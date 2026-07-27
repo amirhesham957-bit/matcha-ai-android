@@ -21,6 +21,8 @@ import com.example.matchaai.ui.components.GlowButton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
+    isAnalyzing: Boolean,
+    recentIntel: List<com.example.matchaai.data.RecentIntel>,
     onAnalyzeClick: (String) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -87,11 +89,17 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        GlowButton(
-            text = "ANALYZE NOW",
-            onClick = { if (searchQuery.isNotBlank()) onAnalyzeClick(searchQuery) },
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (isAnalyzing) {
+            Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MatchaGreen)
+            }
+        } else {
+            GlowButton(
+                text = "ANALYZE NOW",
+                onClick = { if (searchQuery.isNotBlank()) onAnalyzeClick(searchQuery) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(48.dp))
 
@@ -103,61 +111,55 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Recent Items
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(3) { index ->
-                val ticker = when (index) {
-                    0 -> "NVDA"
-                    1 -> "AAPL"
-                    else -> "TSLA"
-                }
-                val signal = when (index) {
-                    0 -> "BUY"
-                    1 -> "HOLD"
-                    else -> "SELL"
-                }
-                val color = when (index) {
-                    0 -> SignalBuy
-                    1 -> SignalHold
-                    else -> SignalSell
-                }
+        if (recentIntel.isEmpty()) {
+            Text("No recent intelligence found.", color = TextMuted)
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(recentIntel.size) { index ->
+                    val intel = recentIntel[index]
+                    val color = when (intel.decision) {
+                        "BUY" -> SignalBuy
+                        "SELL" -> SignalSell
+                        else -> SignalHold
+                    }
 
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = ticker,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Black
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Tech Sector",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = TextMuted
-                            )
-                        }
-
-                        Box(
+                    GlassCard(modifier = Modifier.fillMaxWidth()) {
+                        Row(
                             modifier = Modifier
-                                .clip(CircleShape)
-                                .background(color.copy(alpha = 0.2f))
-                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = signal,
-                                color = color,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.ExtraBold
-                            )
+                            Column {
+                                Text(
+                                    text = intel.ticker,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Confidence: ${intel.confidence}%",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = TextMuted
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(color.copy(alpha = 0.2f))
+                                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = intel.decision,
+                                    color = color,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
                         }
                     }
                 }

@@ -13,9 +13,25 @@ data class AnalysisRequest(val ticker: String)
 data class AnalysisResponse(
     val status: String,
     val ticker: String,
-    val session_id: String?,
-    val verdict: String?,
-    val message: String?
+    val session_id: String? = null,
+    val verdict: String? = null,
+    val decision: String? = null,
+    val confidence: Int? = null,
+    val reasoning: String? = null,
+    val message: String? = null
+)
+
+data class RecentIntel(
+    val ticker: String,
+    val decision: String,
+    val confidence: Int,
+    val created_at: String
+)
+
+data class RecentIntelResponse(
+    val status: String,
+    val data: List<RecentIntel>? = null,
+    val message: String? = null
 )
 
 object ApiClient {
@@ -46,6 +62,29 @@ object ApiClient {
                     val responseBody = response.body?.string()
                     if (responseBody != null) {
                         return@withContext gson.fromJson(responseBody, AnalysisResponse::class.java)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return@withContext null
+        }
+    }
+
+    suspend fun getRecentIntelligence(): RecentIntelResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/recent")
+                    .get()
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) return@withContext null
+                    
+                    val responseBody = response.body?.string()
+                    if (responseBody != null) {
+                        return@withContext gson.fromJson(responseBody, RecentIntelResponse::class.java)
                     }
                 }
             } catch (e: Exception) {

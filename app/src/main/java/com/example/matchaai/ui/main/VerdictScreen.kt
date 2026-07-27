@@ -9,24 +9,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.matchaai.theme.*
 import com.example.matchaai.ui.components.GlassCard
 import com.example.matchaai.ui.components.GlowButton
+import com.example.matchaai.ui.components.TradingViewChart
 
 @Composable
 fun VerdictScreen(
     ticker: String,
-    verdictText: String,
+    decision: String,
+    confidence: Int,
+    reasoning: String,
     onBackHome: () -> Unit
 ) {
+    val decisionColor = when (decision.uppercase()) {
+        "BUY" -> SignalBuy
+        "SELL" -> SignalSell
+        else -> SignalHold
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundDeep)
-            .padding(24.dp)
+            .padding(top = 24.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
             .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -48,41 +56,50 @@ fun VerdictScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Big Verdict Display
+        // TradingView Chart
         Box(
-            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(200.dp)
-                .clip(RoundedCornerShape(100.dp))
-                .background(MatchaGreen.copy(alpha = 0.1f))
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(RoundedCornerShape(16.dp))
+                .background(BackgroundElevated)
         ) {
-            Text(
-                text = "BUY",
-                fontSize = 64.sp,
-                fontWeight = FontWeight.Black,
-                color = MatchaGreen,
-                letterSpacing = 2.sp
-            )
+            TradingViewChart(ticker = ticker)
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Confidence & Risk
+        // Decision and Confidence
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            VerdictMetric(label = "Confidence", value = "87%", color = MatchaGreen)
-            VerdictMetric(label = "Risk Level", value = "LOW", color = MatchaGold)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(decisionColor.copy(alpha = 0.1f))
+            ) {
+                Text(
+                    text = decision.uppercase(),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = decisionColor,
+                    letterSpacing = 1.sp
+                )
+            }
+            VerdictMetric(label = "Confidence", value = "$confidence%", color = decisionColor)
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Core Thesis
         GlassCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Core Thesis",
                     style = MaterialTheme.typography.labelLarge,
@@ -90,25 +107,15 @@ fun VerdictScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = verdictText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = 24.sp
+                    text = reasoning,
+                    style = MaterialTheme.typography.bodyMedium,
+                    lineHeight = 20.sp,
+                    maxLines = 5
                 )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    TradeLevel("Entry", "$120.50")
-                    TradeLevel("Target", "$145.00")
-                    TradeLevel("Stop", "$112.00")
-                }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
 
         GlowButton(
             text = "RETURN TO HQ",
@@ -125,13 +132,5 @@ fun VerdictMetric(label: String, value: String, color: androidx.compose.ui.graph
         Text(text = label, style = MaterialTheme.typography.labelMedium, color = TextMuted)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = value, style = MaterialTheme.typography.headlineMedium, color = color)
-    }
-}
-
-@Composable
-fun TradeLevel(label: String, price: String) {
-    Column {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = TextMuted)
-        Text(text = price, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
 }
