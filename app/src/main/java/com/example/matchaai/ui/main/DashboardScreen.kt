@@ -73,10 +73,11 @@ fun DashboardScreen(
                     Icon(Icons.Default.Search, contentDescription = "Search", tint = MatchaGreen)
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
-                    containerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
                     cursorColor = MatchaGreen,
                     focusedTextColor = TextPrimary
                 ),

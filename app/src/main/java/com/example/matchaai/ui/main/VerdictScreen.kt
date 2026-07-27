@@ -19,6 +19,7 @@ import com.example.matchaai.ui.components.GlowButton
 @Composable
 fun VerdictScreen(
     ticker: String,
+    verdictText: String,
     onBackHome: () -> Unit
 ) {
     Column(
@@ -89,7 +90,7 @@ fun VerdictScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Strong technical breakout aligned with exceptional earnings growth. Council consensus achieved with minor bear concerns regarding valuation multiples.",
+                    text = verdictText,
                     style = MaterialTheme.typography.bodyLarge,
                     lineHeight = 24.sp
                 )

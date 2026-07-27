@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -45,18 +46,16 @@ fun GlowButton(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .drawBehind {
-                val paint = Paint().asFrameworkPaint().apply {
-                    this.color = glowColor.copy(alpha = alpha).toArgb()
+                val frameworkPaint = android.graphics.Paint().apply {
+                    color = glowColor.copy(alpha = alpha).toArgb()
                     setShadowLayer(40f, 0f, 0f, this.color)
                 }
                 drawIntoCanvas { canvas ->
-                    canvas.save()
-                    canvas.drawRoundRect(
+                    canvas.nativeCanvas.drawRoundRect(
                         0f, 0f, size.width, size.height,
                         cornerRadius.toPx(), cornerRadius.toPx(),
-                        paint
+                        frameworkPaint
                     )
-                    canvas.restore()
                 }
             }
             .clip(RoundedCornerShape(cornerRadius))
